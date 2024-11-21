@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>코드잇 과제 - 선거시스템</title>
+  <style>
+    body {
+      font-family: 'Nanum Pen Script', "맑은 고딕";
+      margin: 20px;
+      font-size:1.0em;
+      text-align: center;
+    }
+    .hidden {
+      display: none;
+    }
+    .candidate {
+      margin: 10px 0;
+    }
+    button {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>선거시스템</h1>
+  <div id="회원가입/로그인">
+    <h2>회원가입</h2>
+    <label>
+      이름:
+      <input type="text" id="signup-username">
+    </label><br>
+    <label>
+      비밀번호:
+      <input type="password" id="signup-password">
+    </label><br>
+    <label>
+      지역 설정:
+      <select id="signup-region">
+        <option value="서울">서울</option>
+        <option value="경기">경기</option>
+        <option value="강원">강원</option>
+        <option value="충북">충북</option>
+        <option value="충남">충남</option>
+        <option value="전북">전북</option>
+        <option value="전남">전남</option>
+        <option value="경북">경북</option>
+        <option value="경남">경남</option>
+      </select>
+    </label><br>
+    <button onclick="signUp()">회원 가입하기</button>
+
+    <h2>로그인</h2>
+    <label>
+      이름:
+      <input type="text" id="login-username">
+    </label><br>
+    <label>
+      비밀번호:
+      <input type="password" id="login-password">
+    </label><br>
+    <button onclick="logIn()">로그인하기</button>
+    <p id="auth-message"></p>
+  </div>
+
+  <div id="후보등록/로그아웃" class="hidden">
+    <h2>환영합니다, <span id="user-name"></span>!</h2>
+    <button onclick="logOut()">로그아웃하기</button>
+    <h3>지역: <span id="user-region"></span></h3>
+
+    <h3>후보 등록신청</h3>
+    <button onclick="registerCandidate()">신청하기</button>
+    <p id="register-message"></p>
+
+    <h3>후보에게 투표하기</h3>
+    <div id="candidate-list"></div>
+  </div>
+
+  <script>
+    const users = [];
+    let currentUser = null;
+    const candidates = {
+      서울: [],
+      경기: [],
+      강원: [],
+      충북: [],
+      충남: [],
+      전남: [],
+      전북: [],
+      경북: [],
+      경남: [],
+    };
+
+    // Sign Up
+    function signUp() {
+      const username = document.getElementById('signup-username').value;
+      const password = document.getElementById('signup-password').value;
+      const region = document.getElementById('signup-region').value;
+
+      if (users.some(user => user.username === username)) {
+        alert('이미 존재하는 회원입니다!');
+        return;
+      }
+
+      users.push({ username, password, region });
+        alert('회원가입 완료');
+        document.getElementById('signup-username').value = '';
+        document.getElementById('signup-password').value = '';
+        document.getElementById('signup-region').value = '서울'
+    }
+
+
+    // Log In
+    function logIn() {
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
+
+      const user = users.find(u => u.username === username && u.password === password);
+
+      if (!user) {
+        document.getElementById('auth-message').textContent = '없는 회원입니다.';
+        return;
+      }
+
+      currentUser = user;
+      document.getElementById('회원가입/로그인').classList.add('hidden');
+      document.getElementById('후보등록/로그아웃').classList.remove('hidden');
+      document.getElementById('user-name').textContent = user.username;
+      document.getElementById('user-region').textContent = user.region;
+
+      updateCandidates();
+    }
+
+    // Log Out
+    function logOut() {
+      currentUser = null;
+      document.getElementById('login-username').value = '';
+      document.getElementById('login-password').value = '';
+      document.getElementById('회원가입/로그인').classList.remove('hidden');
+      document.getElementById('후보등록/로그아웃').classList.add('hidden');
+    }
+
+    // Register as a Candidate
+    function registerCandidate() {
+      if (!currentUser) return;
+
+      const region = currentUser.region;
+      const username = currentUser.username;
+
+      if (candidates[region].includes(username)) {
+        document.getElementById('register-message').textContent = '이미 등록신청된 회원입니다.';
+        return;
+      }
+
+      candidates[region].push(username);
+      document.getElementById('register-message').textContent = '등록 완료되었습니다.';
+      updateCandidates();
+    }
+
+    // Update Candidates List
+    function updateCandidates() {
+        if (!currentUser) return;
+
+        const region = currentUser.region;
+        const candidateList = document.getElementById('candidate-list');
+        candidateList.innerHTML = '';
+
+        candidates[region].forEach(candidate => {
+        const candidateElement = document.createElement('div');
+        candidateElement.className = 'candidate';
+        candidateElement.innerHTML = `
+        <label>
+            <input type="checkbox"> ${candidate}
+        </label>
+    `   ;
+        candidateList.appendChild(candidateElement);
+        });
+    }
+
+  </script>
+</body>
+</html>
